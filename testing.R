@@ -198,7 +198,7 @@ age > 50 | age < 18 #This is the OR operator. It evaluates to TRUE if at least o
 age[age > 50 | age < 18]
 # [1] 15 52 73 81
 
-# We could also use which(), a function that returns the INDEX of the elements that fulfill the condition
+# We could also use which(). The result will be the same as if we did not use it in this context, so I personally find it pointless
 
 which(age > 50 | age < 18)
 # [1] 1 4 5 6
@@ -228,3 +228,150 @@ str(expression)
 samplegroup <- factor(samplegroup, levels = c('KO', 'CTL', 'OE'))
 str(samplegroup)
 # Factor w/ 3 levels "KO","CTL","OE": 2 2 2 1 1 1 3 3 3
+
+# The next step is learning how to select data on bidimensional data structures like matrices and data frames (note that the dimensions are rows and columns). Because we have 2 dimensions, we will need 2 indices inside the brackets. Remember that ROW num comes first and COL num comes sec, separated by a comma.
+
+metadata
+metadata[1, 1] # Selects the first row, first column
+# [1] "Wt"
+metadata[1, 3] # Selects first row, third column
+# [1] 1
+
+# You could also select just the row or just the column by leaving a blank space. The key is to keep the comma placed correctly
+
+metadata[3, ] # Will select the whole third row
+#         genotype celltype replicate
+# sample3       Wt    typeA         3
+metadata[ , 3] # Will select the whole third col
+#  [1] 1 2 3 1 2 3 1 2 3 1 2 3
+
+# You can also seelct multiple rows/cols by using vectors as before
+
+metadata[c(1, 3, 6), ] #Will select the first, third and sisth rows
+metadata[ ,1:2] # Will select the first two cols
+
+# You can also use col names instead of numbers to refer to them when selecting
+
+metadata[1:3, 'celltype'] # Will select the first three rows in the column named 'celltype'
+
+# By using the $ sign we can select an entire col in order to operate with it. Example: if we wanted to extract all genotypes from our metadata data frame, we would do:
+
+metadata$genotype
+#  [1] "Wt" "Wt" "Wt" "KO" "KO" "KO" "Wt" "Wt" "Wt" "KO" "KO" "KO"
+
+# This is also useful to select values within a particular col
+
+metadata$genotype[1:5]
+#[1] "Wt" "Wt" "Wt" "KO" "KO"
+
+#Note that this last operation is equivalent to this one:
+
+metadata[1:5, 1]
+# [1] "Wt" "Wt" "Wt" "KO" "KO"
+
+# Or this one:
+
+metadata[1:5, 'genotype']
+# [1] "Wt" "Wt" "Wt" "KO" "KO"
+
+# Note that there is no $ in rows, but you can used the other methods above explained to select them
+
+# Use colnames() or names() in order to remind yourself of the col names in a data frame. To do so in rows, use rownames()
+
+colnames(metadata)
+# [1] "genotype"  "celltype"  "replicate"
+
+rownames(metadata)
+# [1] "sample1"  "sample2"  "sample3"  "sample4"  "sample5" 
+# [6] "sample6"  "sample7"  "sample8"  "sample9"  "sample10"
+# [11] "sample11" "sample12"
+
+# In order to select multiple cols/rows you need to concatenate them inside a vector
+
+metadata[ ,c('genotype', 'replicate')]
+metadata[c('sample10', 'sample12'), ]
+
+# We can also use variables and logical operations to select particular rows inside a col which have the value we want. Example: select all the samples whose cell type is A within the metadata data frame
+
+idx <- metadata$celltype == 'typeA'
+metadata[idx, ]
+
+# We can also use the which() and the result will still be the exact same
+
+idx <- which(metadata$celltype == 'typeA')
+sub_meta <- metadata[idx, ]
+
+# Exercise: Subset the metadata dataframe to return only the rows of data with a genotype of KO.
+
+idx_1 <- metadata$genotype == 'KO'
+sub_meta_1 <- metadata[idx_1, ]
+sub_meta_1
+
+# We have other options available for subsetting, such as the filter() and subset() functions.
+
+subset(metadata, subset = metadata$genotype == 'KO') # Will create a subset of metadata in which we will have selected the rows that are TRUE for the stablished condition 
+
+# When working with liss, we need to use a double bracket notation [[]]
+
+list1[[2]] # This selects the second element on the whole list. In this case, it corresponds to the data frame comprising the vectors species and glengths
+
+# By using an additional bracket we can reference what's stored inside the list component. Example:
+
+list1[[1]] # Will select the first component of the list
+# [1] "e.coli" "human"  "corn" 
+list1[[1]][1] # Will select the first element of the first component of the list
+# [1] "e.coli"
+
+# Same goes for elements of matrices and data frames stored inside a list, but it is advisable to store the component of the list in a variable and work with it:
+
+comp1 <- list[2]
+
+# Note that if we use a single bracket the original data structure is not retrieved, but rather the information as a list:
+
+one_bracket <- list1[2]
+class(one_bracket)
+# [1] "list"
+two_brackets <- list1[[2]]
+class(two_brackets)
+# [1] "data.frame"
+
+# Exercises
+
+# Let’s practice inspecting lists. Create a list named random with the following components: metadata, age, list1, samplegroup, and number.
+
+random <- list(metadata, age, list1, samplegroup, number)
+
+# Print out the values stored in the samplegroup component
+
+random[[4]]
+
+# From the metadata component of the list, extract the celltype column. From the celltype values select only the last 5 values.
+
+random[[1]][8:12, 'celltype']
+
+# We can assign dif names to the components of the list and check them using names()
+
+names(list1) <- c('species', 'df', 'number')
+names(list1)
+
+# We can use this to extract a particular component from a list using $ as we did before. This gives us three methods to access the same information:
+
+list1$species
+list1[[1]]
+list1[['species']]
+
+# Exercise:
+
+# Set names for the random list you created in the last exercise
+
+names(random) <-  c('metadata', 'age', 'list', 'samplegroup', 'number')
+
+# Extract the third component of the age vector from the random list.
+
+random[['age']][3]
+# [1] 45
+
+# Extract the genotype information from the metadata dataframe from the random list.
+
+random$metadata$genotype
+# [1] "Wt" "Wt" "Wt" "KO" "KO" "KO" "Wt" "Wt" "Wt" "KO" "KO" "KO"
