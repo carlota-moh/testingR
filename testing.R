@@ -375,3 +375,19 @@ random[['age']][3]
 
 random$metadata$genotype
 # [1] "Wt" "Wt" "Wt" "KO" "KO" "KO" "Wt" "Wt" "Wt" "KO" "KO" "KO"
+
+# So far we haven't modified the files. In order to do this, we need to use the write function. It requires two arguments: the variable name of the data structure you are exporting and the path and filename you are exporting it to.
+
+write.csv(sub_meta_1, file = 'data/subset_meta_1.csv')
+
+# This will create a new file that stores the information we tell it to. Let's try and read the file
+
+read.csv('data/subset_meta_1.csv')
+
+# Sometimes when writing a data frame with row names to file, the column names will align starting with the row names column. To avoid this, you can include the argument col.names = NA when writing to file to ensure all of the column names line up with the correct column values.
+
+# If we instead want to write a set of vectors to file use the write() function:
+
+write(glengths, file="data/genome_lengths.txt", ncolumns=1)
+
+read.table('data/genome_lengths.txt')
