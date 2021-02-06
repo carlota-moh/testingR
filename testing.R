@@ -542,3 +542,121 @@ order <- match(rows, cols)
 rpkm_ordered <- rpkm_data[c(order)]
 all(colnames(rpkm_ordered) == rownames(metadata)) # Check if the process worked
 
+# Now we want to make plots to evaluate the average expression in each sample and its relationship with the age of the mouse. In order to do this we need to add some additional columns of information to the metadata data frame we used earlier. 
+
+# The first thing we want to do is get the average expression level for each of our samples. We will do this by using the data in rpkm_data_ordered, in which each column corresponds to a sample. If we only wanted to do this for one sample, we will use mean():
+
+mean(rpkm_data_ordered$sample1)
+
+# But because we want to repeat this process across all columns, we would need to use some kind of loop (such as a for loop). Another way of doing this is by using the map() family of functions.
+
+# First we have to load the purrr package, which contains the map() functions.
+
+library(purrr)
+
+# Each of the map() functions take a vector as an input and outputs a vector of a specified type. This helps us to execute a particular function on each of the elements in a vector, every column of a dataframe, every component of a list... The otuput you get may vary depending of the map() function you choose:
+
+# map() creates a list.
+# map_lgl() creates a logical vector.
+# map_int() creates an integer vector.
+# map_dbl() creates a “double” or numeric vector.
+# map_chr() creates a character vector.
+
+# The basic syntax is map(object, function_to_apply)
+
+# So, back to our example, once we have loaded our library we want to apply the map_dbl() function to our rpkm_data_ordered dataframe so that we can apply the mean() function to each of the columns, thus creating a new vector containing this information.
+
+sample_means <- map_dbl(rpkm_data_ordered, mean)
+
+# Now we wan to create yet another vector with the information of the ages of the mice
+
+age_in_days <- c(40, 32, 38, 35, 41, 32, 34, 26, 28, 28, 30, 32)
+
+# Now we are ready to add this information to our metadata as new columns
+
+new_metadata <- data.frame(metadata, sample_means, age_in_days)
+
+# Once we are done with this we can move on to data visualization using ggplot2. Remember that it expects a data frame as input in order to work properly
+
+# We will start with drawing a simple x-y scatterplot of samplemeans versus age_in_days from the new_metadata data frame. 
+
+ggplot(new_metadata)
+
+# The ggplot() function is used to initialize the basic graph structure, then we add to it. The basic idea is that you specify different parts of the plot using additional functions one after the other and combine them into a “code chunk” using the + operator; the functions in the resulting code chunk are called layers
+
+# The geom (geometric) object is the layer that specifies what kind of plot we want to draw. A plot must have at least one geom; there is no upper limit. Examples:
+
+# points (geom_point, geom_jitter for scatter plots, dot plots, etc)
+# lines (geom_line, for time series, trend lines, etc)
+# boxplot (geom_boxplot, for, well, boxplots!)
+
+# In this example we want to create a scatter plot, so we will be using geom_point()
+
+ggplot(new_metadata) +
+  geom_point()
+# Error: geom_point requires the following missing aesthetics: x and y
+
+# We get an error because each type of geom usually has a required set of aesthetics to be set. “Aesthetics” are set with the aes() function and can be set either nested within geom_point() (applies only to that layer) or within ggplot() (applies to the whole plot)
+
+# The aes() function has many different arguments, and all of those arguments take columns from the original data frame as input. It can be used to specify many plot elements (positions, color, fill, shape of points,linetype...)
+
+ggplot(new_metadata) +
+  geom_point(aes(x = age_in_days, y = sample_means))
+
+# We can color the points on the plot based on the genotype column within aes().
+
+ggplot(new_metadata) +
+  geom_point(aes(x = age_in_days, y = sample_means, color = genotype))
+
+# Let’s try to have both celltype and genotype represented on the plot. To do this we can assign the shape argument in aes() the celltype column, so that each celltype is plotted with a different shaped data point.
+
+ggplot(new_metadata) +
+  geom_point(aes(x = age_in_days, y = sample_means, color = genotype, shape = celltype))
+
+# The data points are quite small. We can adjust the size of the data points within the geom_point() layer, but it should not be within aes() since we are not mapping it to a column in the input data frame, instead we are just specifying a number.
+
+ggplot(new_metadata) +
+  geom_point(aes(x = age_in_days, y = sample_means, color = genotype, shape = celltype), size = 2.25)
+
+# The labels on the x- and y-axis are also quite small and hard to read. To change their size, we need to add an additional theme layer. The ggplot2 theme system handles non-data plot elements (legends, axis labels, plot background...)
+
+# Lets add a layer theme_bw()
+
+ggplot(new_metadata) +
+  geom_point(aes(x = age_in_days, y = sample_means, color = genotype, shape = celltype), size = 3.0) +
+  theme_bw()
+
+# We can add arguments using theme() to change the size of axis labels ourselves. Here we’ll increase the size of the axes titles to be 1.5 times the default size. When modifying the size of text we often use the rel() function. In this way the size we specify is relative to the default.
+
+ggplot(new_metadata) +
+  geom_point(aes(x = age_in_days, y = sample_means, color = genotype, shape = celltype), size = 3.0) +
+  theme_bw() +
+  theme(axis.title = element_text(size = rel(1.5)))
+
+# The current axis label text defaults to what we gave as input to geom_point (i.e the column headers). We can change this by adding additional layers called xlab() and ylab() for the x- and y-axis, respectively. Add these layers to the current plot such that the x-axis is labeled “Age (days)” and the y-axis is labeled “Mean expression”. Use the ggtitle layer to add a title to your plot.
+
+ggplot(new_metadata) +
+  geom_point(aes(x = age_in_days, y = sample_means, color = genotype, shape = celltype), size = 3.0) +
+  theme_bw() +
+  theme(axis.title = element_text(size = rel(1.5))) +
+  xlab('Ages (days)') +
+  ylab('Mean expression') +
+  ggtitle('New metadata') +
+  theme(plot.title=element_text(hjust=0.5))
+
+# When publishing, it is helpful to ensure all plots have similar formatting. To do this we can create a custom function with our preferences for the theme.
+
+personal_theme <- function() {
+  theme_bw() +
+    theme(axis.title = element_text(size = rel(1.5)),
+          plot.title = element_text(size = rel(1.5), hjust = 0.5))
+}
+
+# Now to run our personal theme with any plot, we can use this function in place of the theme() code
+
+ggplot(new_metadata) +
+  geom_point(aes(x = age_in_days, y = sample_means, color = genotype, shape = celltype)) +
+  xlab('Ages (days)') +
+  ylab('Mean expression') +
+  ggtitle('New metadata') +
+  personal_theme()
