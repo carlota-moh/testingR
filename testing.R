@@ -309,9 +309,9 @@ sub_meta_1
 
 # We have other options available for subsetting, such as the filter() and subset() functions.
 
-subset(metadata, subset = metadata$genotype == 'KO') # Will create a subset of metadata in which we will have selected the rows that are TRUE for the stablished condition 
+subset(metadata, subset = metadata$genotype == 'KO') # Will create a subset of metadata in which we will have selected the rows that are TRUE for the established condition 
 
-# When working with liss, we need to use a double bracket notation [[]]
+# When working with list, we need to use a double bracket notation [[]]
 
 list1[[2]] # This selects the second element on the whole list. In this case, it corresponds to the data frame comprising the vectors species and glengths
 
@@ -337,7 +337,7 @@ class(two_brackets)
 
 # Exercises
 
-# Let’s practice inspecting lists. Create a list named random with the following components: metadata, age, list1, samplegroup, and number.
+# Lets practice inspecting lists. Create a list named random with the following components: metadata, age, list1, samplegroup, and number.
 
 random <- list(metadata, age, list1, samplegroup, number)
 
@@ -391,3 +391,154 @@ read.csv('data/subset_meta_1.csv')
 write(glengths, file="data/genome_lengths.txt", ncolumns=1)
 
 read.table('data/genome_lengths.txt')
+
+# The next thing we will work on is working with the RNAseq data. For this we need to open the counts.rpkm.csv file
+
+rpkm_data <- read.csv('counts.rpkm.csv')
+
+# We will take a look at the few first lines using head()
+
+head(rpkm_data)
+
+# Since the number of cols looks similar to the number or rows in metadata, we can check using ncol() and nrow() and see if they match
+
+ncol(rpkm_data)
+# [1] 12
+nrow(metadata)
+# [1] 12
+
+# This does not mean that we have data for every sample we have metadata, so we need to check it out using %in%. It will take a vector c() to the left and evaluate if there is a match in the vector that follows on the right operator. The two vectors do not need to have the same size. The operation will return a logical vector with the size of vector1 whose values indicate whether or not there is a match. For example:
+
+A <- c(1, 3, 5, 7, 9, 11)
+B <- c(2, 4, 6, 8, 1, 5)
+
+A %in% B
+# [1]  TRUE FALSE  TRUE FALSE FALSE FALSE
+
+# Once we have this information, we can recover only the TRUE values by indexing them and using the index as a selection within the vector as follows:
+
+intersection <- A %in% B
+A[intersection]
+# [1] 1 5   
+
+# Since the vectors used are small we can manage this information easily, but this is not feasible when working with larger datasets, in which case we shall use the functions any() or all()
+
+any(A %in% B) # Tells us whether there is some value within A that is also inside B
+# [1] TRUE
+all(A %in% B) # Tells us whether all the values in A are contained in B
+# [1] FALSE
+
+# Exercise: Using the vectors A and B, evaluate the values in B to see if there is a match in A
+
+any(B %in% A)
+# [1] TRUE
+
+# Or:
+
+B %in% A
+
+# [1] FALSE FALSE FALSE FALSE  TRUE  TRUE
+
+# Subset the vector B to return only the values that are also in A
+
+inter <- (B %in% A)
+B[inter]
+# [1] 1 5
+
+# We could also use == to evaluate each position of the vector and test whether or not the values are in the same order. For his to work, the vectors need to have the same length.
+
+C <- c(10, 20, 30, 40, 50)
+D <- c(50, 40, 30, 20, 10)
+
+C %in% D # To test if they have the same values regardless of their order
+# [1] TRUE TRUE TRUE TRUE TRUE
+
+C == D # To check if they are ordered in the same manner
+# [1] FALSE FALSE  TRUE FALSE FALSE
+
+all(C == D) # To check if they are a perfect match, without evaluating individual positions
+# [1] FALSE
+
+# Now we will try this on our data. We will start by crating two vectors containing rownames of metadata and colnames of data
+
+x <- rownames(metadata)
+y <- colnames(rpkm_data)
+
+# Now check if all the components of x are present in y
+
+all(x %in% y)
+# [1] TRUE
+
+# Now we must check for their order
+
+all(x == y)
+# [1] FALSE
+
+# All of the samples are there, but they need to be reordered
+
+# Exercise: We have a list of 6 marker genes that we are very interested in. Our goal is to extract count data for these genes using the %in% operator from the rpkm_data data frame, instead of scrolling through rpkm_data and finding them.
+
+important_genes <- c("ENSMUSG00000083700", "ENSMUSG00000080990", "ENSMUSG00000065619", "ENSMUSG00000047945", "ENSMUSG00000081010", "ENSMUSG00000030970")
+
+important_genes %in% rownames(rpkm_data)
+# [1] TRUE TRUE TRUE TRUE TRUE TRUE
+
+# Extract the rows from rpkm_data that correspond to these 6 genes using [] and the %in% operator. Double check the row names to ensure that you are extracting the correct rows.
+
+sub_rpkm_data <- rpkm_data[important_genes, ]
+
+# Now onto reordering data. This task can be accomplished using re-indexing. If we create a vector:
+
+teaching_team <- c("Jihe", "Mary", "Meeta", "Radhika")
+
+# We can extract values from it using []
+
+teaching_team[c(2, 4)] # Will extract the values stored in the second and fourth position
+# [1] "Mary"    "Radhika"
+
+# We can also extract values and reorder them:
+
+teaching_team[c(4, 2)] # Will extract the values stored in the defined position, but in another order without affecting the original vector
+
+# If we wanted to reorder the vector itself, we need to store the change onto a variable. This variable can be the original vector itself or another one:
+
+reorder_teach <- teaching_team[c(4, 2, 1, 3)]
+teaching_team
+# [1] "Jihe"    "Mary"    "Meeta"   "Radhika"
+reorder_teach
+# [1] "Radhika" "Mary"    "Jihe"    "Meeta" 
+
+# The match() function is used to match the vales in two vectors. It takes at least two arguments: a vector of values in the order you want and a vector of values to e reordered. The function returns the position of the matches (indices) with respect to the second vector, which can be used to re-order it so that it matches the order in the first vector.
+
+first <- c("A","B","C","D","E")
+second <- c("B","D","E","A","C")
+
+# If we want to re-order second so that it matches first, we use the match() function:
+
+match(first, second)
+# [1] 4 1 5 2 3
+
+# The output of the function tells you the order in which you need to put the elements of the second vector for it o match the first vector. You can use this information to re-order the second vector.
+
+reorder_sec <- match(first, second)
+second_reord <- second[reorder_sec]
+
+# Or:
+
+second_reord <- second[match(first, second)]
+
+# If we tried this operation with two vectors of different size, some values will not match,returning an NA value. You can specify what values you would have it assigned using nomatch argument. Also, if there is more than one matching value found only the first is reported.
+
+first <- c("A","B","C","D","E")
+second <- c("D","B","A")
+match(first, second)
+# [1]  3  2 NA  1 NA
+
+# Lets apply this to our genomic data. We now would like to match the row names of our metadata to the column names of our expression data:
+
+rows <- rownames(metadata)
+cols <- colnames(rpkm_data)
+order <- match(rows, cols)
+rpkm_ordered <- rpkm_data[c(order)]
+all(colnames(rpkm_ordered) == rownames(metadata)) # Check if the process worked
+
