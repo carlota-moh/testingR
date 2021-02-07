@@ -660,3 +660,26 @@ ggplot(new_metadata) +
   ylab('Mean expression') +
   ggtitle('New metadata') +
   personal_theme()
+
+# Now we are going to learn how to boxplot. Boxplots provide information about the data distribution based on a 5-number system. The top and bottom of the box represent the (1) first and (2) third quartiles (25th and 75th percentiles, respectively). The line inside the box represents the (3) median (50th percentile). The whiskers extending above and below the box represent the (4) maximum, and (5) minimum of a data set. The whiskers of the plot reach the minimum and maximum values that are not outliers.
+
+# Outliers are determined using the interquartile range (IQR), which is defined as: Q3 - Q1. Any values that exceeds 1.5 x IQR below Q1 or above Q3 are considered outliers and are represented as points above or below the whiskers. These outliers are useful to identify any unexpected observations.
+
+ggplot(new_metadata) +
+  geom_boxplot(aes(x = genotype, y = sample_means, fill = celltype)) +
+  theme_bw() +
+  ggtitle('Genotype differences in average mean expression') +
+  xlab('Genotype') +
+  ylab('Mean expression') +
+  theme(axis.title = element_text(size = rel(1.5)), plot.title = element_text(size = rel(1.5), hjust = 0.5))
+
+# If you wanted to change the colors of these boxplots you would add another layer scale_fill_manual() to the code, and within the function specify which colors you want to use using the values argument. For example, if the factor column you are coloring with has 2 levels, you will need to give 2 values as follows scale_fill_manual(values=c("purple","orange")).
+
+ggplot(new_metadata) +
+  geom_boxplot(aes(x = genotype, y = sample_means, fill = celltype)) +
+  theme_bw() +
+  ggtitle('Genotype differences in average mean expression') +
+  xlab('Genotype') +
+  ylab('Mean expression') +
+  theme(axis.title = element_text(size = rel(1.5)), plot.title = element_text(size = rel(1.5), hjust = 0.5)) +
+  scale_fill_manual(values=c('purple', 'orange'))
