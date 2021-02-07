@@ -683,3 +683,20 @@ ggplot(new_metadata) +
   ylab('Mean expression') +
   theme(axis.title = element_text(size = rel(1.5)), plot.title = element_text(size = rel(1.5), hjust = 0.5)) +
   scale_fill_manual(values=c('purple', 'orange'))
+
+# We can directly export the figure using the Export button or we can hard-code this by using a function.
+
+# If we wanted to print our scatterplot to a pdf file format, we would need to initialize a plot using a function which specifies the graphical format you intend on creating i.e.pdf(), png(), tiff() etc. Within the function you will need to specify a name for your image
+
+pdf("figures/scatterplot.pdf")
+
+# Now we need to code the function that will be saved inside the device we just created
+
+ggplot(new_metadata) +
+  geom_point(aes(x = age_in_days, y= sample_means, color = genotype, shape=celltype), size=rel(3.0)) 
+
+# Now close the device
+
+dev.off()
+
+# Remember that you will not be able to open and look at your file using standard methods (Adobe Acrobat or Preview etc.) until you execute the dev.off() function.
