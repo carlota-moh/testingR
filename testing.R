@@ -6,7 +6,7 @@ x <- 3
 y <- 5
 number <- x + y
 x <- 5
-number <- x+ y 
+number <- x + y 
 
 # Introducing vectors c(), which are a kind of data structure containing THE SAME data type
 

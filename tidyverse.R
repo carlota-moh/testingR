@@ -21,7 +21,7 @@ factor(rep_number) %>% head()
 
 # For this class we will be using some data and our goal is to compare the most significant biological processes (BP) based on the number of differentially expressed genes (gene ratios) and significance values by creating a plot. 
 
-# First let's open the file an save the data to a varible using the read_delim() function:
+# First let's open the file an save the data to a variable using the read_delim() function:
 
 functional_GO_results <- read_delim('data/gprofiler_results_Mov10oe.csv', delim = '\t')
 functional_GO_results

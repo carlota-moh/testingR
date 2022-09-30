@@ -1,3 +1,6 @@
+library(tidyverse)
+starwars <- starwars
+
 # filter() allows us to filter the data according to a specific parameter, but showing all of the cols
 
 starwars %>% filter(species == 'Droid')
